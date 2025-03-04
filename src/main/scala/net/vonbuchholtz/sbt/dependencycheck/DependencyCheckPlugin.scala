@@ -1,4 +1,4 @@
-package net.vonbuchholtz.sbt.dependencycheck
+package net.juanpablosantos.sbt.dependencycheck
 
 import org.apache.commons.logging.LogFactory
 import org.owasp.dependencycheck.Engine

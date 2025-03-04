@@ -1,4 +1,4 @@
-package net.vonbuchholtz.sbt.dependencycheck
+package net.juanpablosantos.sbt.dependencycheck
 
 import java.io.File
 

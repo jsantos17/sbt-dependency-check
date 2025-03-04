@@ -4,7 +4,7 @@ import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.ReleaseStateTransformations.setNextVersion
 
 
-organization := "net.vonbuchholtz"
+organization := "net.juanpablosantos"
 name := "sbt-dependency-check"
 
 val sbtDependencyCheck = (project in file("."))
@@ -29,9 +29,11 @@ ThisBuild / dependencyCheckSuppressionFiles := Seq(new File("dependency-check-su
 ThisBuild / dependencyCheckAssemblyAnalyzerEnabled := Some(false)
 
 
-ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / publishMavenStyle .withRank(KeyRanks.Invisible) := true
-sonatypeProfileName := "net.vonbuchholtz"
+
+ThisBuild / githubOwner := "jsantos17"
+ThisBuild / githubRepository := "sbt-dependency-check"
+ThisBuild / githubTokenSource := TokenSource.Environment("GITHUB_TOKEN")
 
 // To sync with Maven central, you need to supply the following information:
  Global / pomExtra := {
@@ -57,23 +59,6 @@ sonatypeProfileName := "net.vonbuchholtz"
 }
 
 
-
-releaseProcess := Seq[ReleaseStep](
-	checkSnapshotDependencies,
-	inquireVersions,
-	runClean,
-	releaseStepCommandAndRemaining("^ test"),
-	releaseStepCommandAndRemaining("^ scripted"),
-	setReleaseVersion,
-	commitReleaseVersion,
-	setReleaseVersionInReadme,
-	tagRelease,
-	releaseStepCommandAndRemaining("^ publishSigned"),
-	releaseStepCommandAndRemaining("sonatypeBundleRelease"),
-	setNextVersion,
-	commitNextVersion
-	//,pushChanges
-)
 
 lazy val setReleaseVersionInReadme: ReleaseStep = ReleaseStep(action = { st: State =>
 
