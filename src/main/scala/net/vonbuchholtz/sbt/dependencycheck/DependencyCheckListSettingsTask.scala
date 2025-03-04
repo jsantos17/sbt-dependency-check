@@ -32,7 +32,7 @@ object DependencyCheckListSettingsTask {
     }
 
     logBooleanSetting(AUTO_UPDATE, "dependencyCheckAutoUpdate", log)
-    logStringSetting(NVD_API_VALID_FOR_HOURS, "dependencyCheckCveValidForHours", log)
+    logStringSetting(NVD_API_VALID_FOR_HOURS, "dependencyCheckNvdApiValidForHours", log)
     log.info(s"\tdependencyCheckFailBuildOnCVSS: ${failBuildOnCVSS.toString}")
     logFloatSetting(JUNIT_FAIL_ON_CVSS, "dependencyCheckJUnitFailBuildOnCVSS", log)
     log.info(s"\tdependencyCheckFormats (combined with dependencyCheckFormat): ${formats.mkString(", ")}")
