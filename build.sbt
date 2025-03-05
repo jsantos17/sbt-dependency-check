@@ -11,7 +11,7 @@ val sbtDependencyCheck = (project in file("."))
 	.enablePlugins(SbtPlugin)
 	.settings(
 		libraryDependencies ++= Seq(
-			"org.owasp" % "dependency-check-core" % "9.0.0"
+			"org.owasp" % "dependency-check-core" % "12.1.0"
 		),
 		sbtPlugin := true,
 		dependencyUpdatesFilter -= moduleFilter(organization = "org.scala-lang") | moduleFilter(organization = "org.scala-sbt"),
@@ -27,6 +27,7 @@ ThisBuild / dependencyCheckSkipProvidedScope := true
 ThisBuild / dependencyCheckFormat := "ALL"
 ThisBuild / dependencyCheckSuppressionFiles := Seq(new File("dependency-check-suppressions.xml"))
 ThisBuild / dependencyCheckAssemblyAnalyzerEnabled := Some(false)
+ThisBuild / dependencyCheckNvdApiKey := sys.env.get("DEPENDENCY_CHECK_NVD_API_KEY")
 
 
 ThisBuild / publishMavenStyle .withRank(KeyRanks.Invisible) := true

@@ -105,6 +105,7 @@ trait DependencyCheckKeys {
 	lazy val dependencyCheckPathToGo = settingKey[Option[File]]("The path to the \"go\" runtime.")
 
 	// Advanced configuration
+	lazy val dependencyCheckNvdApiKey = settingKey[Option[String]]("The API key used when connecting to the NVD API.")
 	lazy val dependencyCheckNvdApiUser = settingKey[Option[String]]("The username used when connecting to the NVD API.")
 	lazy val dependencyCheckNvdApiPassword = settingKey[Option[String]]("The password used when connecting to the NVD API.")
 	lazy val dependencyCheckNvdApiStartYear = settingKey[Option[Int]]("The first year of NVD CVE data to download from the NVD API.")

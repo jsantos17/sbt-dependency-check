@@ -126,6 +126,7 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
     dependencyCheckPathToGo := None,
 
     // Advanced configuration
+    dependencyCheckNvdApiKey := None,
     dependencyCheckNvdApiUser := None,
     dependencyCheckNvdApiPassword := None,
     dependencyCheckNvdApiStartYear := None,
@@ -302,6 +303,7 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
     setStringSetting(ANALYZER_ARTIFACTORY_BEARER_TOKEN, dependencyCheckArtifactoryAnalyzerBearerToken.value)
 
     // Advanced Configuration
+    setStringSetting(NVD_API_KEY, dependencyCheckNvdApiKey.value)
     setStringSetting(NVD_API_DATAFEED_USER, dependencyCheckNvdApiUser.value)
     setStringSetting(NVD_API_DATAFEED_PASSWORD, dependencyCheckNvdApiPassword.value)
     setIntSetting(NVD_API_DATAFEED_START_YEAR, dependencyCheckNvdApiStartYear.value.map(_.max(2002)))
@@ -613,7 +615,6 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
   private def createReport(engine: Engine, checkClasspath: Set[Attributed[File]], scanSet: Seq[File], outputDir: File, reportFormats: Seq[String], useSbtModuleIdAsGav: Boolean, log: Logger): Unit = {
     addDependencies(checkClasspath, engine, useSbtModuleIdAsGav, log)
     scanSet.foreach(file => engine.scan(file))
-
     engine.analyzeDependencies()
     reportFormats.foreach(reportFormat => engine.writeReports(engine.getSettings.getString(APPLICATION_NAME), outputDir, reportFormat, null))
   }
@@ -627,11 +628,12 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
 
   def failBuildOnCVSS(dependencies: Array[Dependency], cvssScore: Float): Boolean = dependencies.exists(p => {
     p.getVulnerabilities.asScala.exists(v => {
-      ((v.getCvssV2() != null && v.getCvssV2().getCvssData().getBaseScore() >= cvssScore)
-         || (v.getCvssV3() != null && v.getCvssV3().getCvssData().getBaseScore() >= cvssScore)
-         || (v.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) >= cvssScore)
-         //safety net to fail on any if for some reason the above misses on 0
-         || (cvssScore <= 0.0f))
+     ((v.getCvssV2() != null && v.getCvssV2().getCvssData().getBaseScore() >= cvssScore)
+        || (v.getCvssV3() != null && v.getCvssV3().getCvssData().getBaseScore() >= cvssScore)
+        || (v.getCvssV4() != null && v.getCvssV4().getCvssData().getBaseScore() >= cvssScore)
+        || (v.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) >= cvssScore)
+        //safety net to fail on any if for some reason the above misses on 0
+        || (cvssScore <= 0.0f))
     })
   })
 

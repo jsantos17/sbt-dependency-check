@@ -128,6 +128,7 @@ object DependencyCheckListSettingsTask {
     logFileSetting(ANALYZER_GOLANG_PATH, "dependencyCheckPathToGo", log)
 
     // Advanced Configuration
+    logStringSetting(NVD_API_KEY, "dependencyCheckNvdApiUser", log)
     logStringSetting(NVD_API_DATAFEED_USER, "dependencyCheckNvdApiUser", log)
     logStringSetting(NVD_API_DATAFEED_PASSWORD, "dependencyCheckNvdApiPassword", log)
     logStringSetting(NVD_API_DATAFEED_START_YEAR , "dependencyCheckNvdApiStartYear", log)
