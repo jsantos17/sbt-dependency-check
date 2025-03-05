@@ -4,14 +4,14 @@ import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.ReleaseStateTransformations.setNextVersion
 
 
-organization := "net.vonbuchholtz"
+organization := "net.juanpablosantos"
 name := "sbt-dependency-check"
 
 val sbtDependencyCheck = (project in file("."))
 	.enablePlugins(SbtPlugin)
 	.settings(
 		libraryDependencies ++= Seq(
-			"org.owasp" % "dependency-check-core" % "8.1.2"
+			"org.owasp" % "dependency-check-core" % "12.1.0"
 		),
 		sbtPlugin := true,
 		dependencyUpdatesFilter -= moduleFilter(organization = "org.scala-lang") | moduleFilter(organization = "org.scala-sbt"),
@@ -27,11 +27,14 @@ ThisBuild / dependencyCheckSkipProvidedScope := true
 ThisBuild / dependencyCheckFormat := "ALL"
 ThisBuild / dependencyCheckSuppressionFiles := Seq(new File("dependency-check-suppressions.xml"))
 ThisBuild / dependencyCheckAssemblyAnalyzerEnabled := Some(false)
+ThisBuild / dependencyCheckNvdApiKey := sys.env.get("DEPENDENCY_CHECK_NVD_API_KEY")
 
 
-ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / publishMavenStyle .withRank(KeyRanks.Invisible) := true
-sonatypeProfileName := "net.vonbuchholtz"
+
+ThisBuild / githubOwner := "jsantos17"
+ThisBuild / githubRepository := "sbt-dependency-check"
+ThisBuild / githubTokenSource := TokenSource.Environment("GITHUB_TOKEN")
 
 // To sync with Maven central, you need to supply the following information:
  Global / pomExtra := {
@@ -57,23 +60,6 @@ sonatypeProfileName := "net.vonbuchholtz"
 }
 
 
-
-releaseProcess := Seq[ReleaseStep](
-	checkSnapshotDependencies,
-	inquireVersions,
-	runClean,
-	releaseStepCommandAndRemaining("^ test"),
-	releaseStepCommandAndRemaining("^ scripted"),
-	setReleaseVersion,
-	commitReleaseVersion,
-	setReleaseVersionInReadme,
-	tagRelease,
-	releaseStepCommandAndRemaining("^ publishSigned"),
-	releaseStepCommandAndRemaining("sonatypeBundleRelease"),
-	setNextVersion,
-	commitNextVersion
-	//,pushChanges
-)
 
 lazy val setReleaseVersionInReadme: ReleaseStep = ReleaseStep(action = { st: State =>
 

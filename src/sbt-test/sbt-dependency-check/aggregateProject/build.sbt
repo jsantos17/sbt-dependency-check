@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  organization := "net.vonbuchholtz",
+  organization := "net.juanpablosantos",
   version := "0.1.0",
   scalaVersion := "2.10.7"
 )

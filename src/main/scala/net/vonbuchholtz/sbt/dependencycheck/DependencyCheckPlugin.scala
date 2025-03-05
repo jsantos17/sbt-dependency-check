@@ -1,4 +1,4 @@
-package net.vonbuchholtz.sbt.dependencycheck
+package net.juanpablosantos.sbt.dependencycheck
 
 import org.apache.commons.logging.LogFactory
 import org.owasp.dependencycheck.Engine
@@ -126,12 +126,10 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
     dependencyCheckPathToGo := None,
 
     // Advanced configuration
-    dependencyCheckCveUrlModified := None,
-    dependencyCheckCveUrlBase := None,
-    dependencyCheckCveUser := None,
-    dependencyCheckCvePassword := None,
-    dependencyCheckCveWaitTime := None,
-    dependencyCheckCveStartYear := None,
+    dependencyCheckNvdApiKey := None,
+    dependencyCheckNvdApiUser := None,
+    dependencyCheckNvdApiPassword := None,
+    dependencyCheckNvdApiStartYear := None,
     dependencyCheckConnectionTimeout := None,
     dependencyCheckConnectionReadTimeout := None,
     dependencyCheckDataDirectory := None,
@@ -220,7 +218,6 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
     log.info("Applying project settings to DependencyCheck settings")
 
     setBooleanSetting(AUTO_UPDATE, dependencyCheckAutoUpdate.value)
-    setIntSetting(CVE_CHECK_VALID_FOR_HOURS, dependencyCheckCveValidForHours.value)
     setFloatSetting(JUNIT_FAIL_ON_CVSS, dependencyCheckJUnitFailBuildOnCVSS.value)
 
     settings.setStringIfNotEmpty(APPLICATION_NAME, name.value)
@@ -306,12 +303,10 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
     setStringSetting(ANALYZER_ARTIFACTORY_BEARER_TOKEN, dependencyCheckArtifactoryAnalyzerBearerToken.value)
 
     // Advanced Configuration
-    setUrlSetting(CVE_MODIFIED_JSON, dependencyCheckCveUrlModified.value)
-    setStringSetting(CVE_BASE_JSON, dependencyCheckCveUrlBase.value)
-    setStringSetting(CVE_USER, dependencyCheckCveUser.value)
-    setStringSetting(CVE_PASSWORD, dependencyCheckCvePassword.value)
-    setIntSetting(CVE_DOWNLOAD_WAIT_TIME, dependencyCheckCveWaitTime.value)
-    setIntSetting(CVE_START_YEAR, dependencyCheckCveStartYear.value.map(_.max(2002)))
+    setStringSetting(NVD_API_KEY, dependencyCheckNvdApiKey.value)
+    setStringSetting(NVD_API_DATAFEED_USER, dependencyCheckNvdApiUser.value)
+    setStringSetting(NVD_API_DATAFEED_PASSWORD, dependencyCheckNvdApiPassword.value)
+    setIntSetting(NVD_API_DATAFEED_START_YEAR, dependencyCheckNvdApiStartYear.value.map(_.max(2002)))
     setIntSetting(CONNECTION_TIMEOUT, dependencyCheckConnectionTimeout.value)
     setIntSetting(CONNECTION_READ_TIMEOUT, dependencyCheckConnectionReadTimeout.value)
     setFileSetting(DATA_DIRECTORY, dependencyCheckDataDirectory.value)
@@ -620,7 +615,6 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
   private def createReport(engine: Engine, checkClasspath: Set[Attributed[File]], scanSet: Seq[File], outputDir: File, reportFormats: Seq[String], useSbtModuleIdAsGav: Boolean, log: Logger): Unit = {
     addDependencies(checkClasspath, engine, useSbtModuleIdAsGav, log)
     scanSet.foreach(file => engine.scan(file))
-
     engine.analyzeDependencies()
     reportFormats.foreach(reportFormat => engine.writeReports(engine.getSettings.getString(APPLICATION_NAME), outputDir, reportFormat, null))
   }
@@ -634,7 +628,12 @@ object DependencyCheckPlugin extends sbt.AutoPlugin {
 
   def failBuildOnCVSS(dependencies: Array[Dependency], cvssScore: Float): Boolean = dependencies.exists(p => {
     p.getVulnerabilities.asScala.exists(v => {
-      (v.getCvssV2 != null && v.getCvssV2.getScore >= cvssScore) || (v.getCvssV3 != null && v.getCvssV3.getBaseScore >= cvssScore || (v.getUnscoredSeverity != null && SeverityUtil.estimateCvssV2(v.getUnscoredSeverity) >= cvssScore)) || (cvssScore <= 0.0f)
+     ((v.getCvssV2() != null && v.getCvssV2().getCvssData().getBaseScore() >= cvssScore)
+        || (v.getCvssV3() != null && v.getCvssV3().getCvssData().getBaseScore() >= cvssScore)
+        || (v.getCvssV4() != null && v.getCvssV4().getCvssData().getBaseScore() >= cvssScore)
+        || (v.getUnscoredSeverity() != null && SeverityUtil.estimateCvssV2(v.getUnscoredSeverity()) >= cvssScore)
+        //safety net to fail on any if for some reason the above misses on 0
+        || (cvssScore <= 0.0f))
     })
   })
 
